@@ -1,4 +1,5 @@
 import { NavLink } from 'react-router-dom'
+import { TennisPlayerSVG } from './TennisDeco'
 
 const links = [
   { to: '/', label: 'Início' },
@@ -8,31 +9,40 @@ const links = [
   { to: '/players', label: 'Jogadores' },
 ]
 
-function ATPLogo() {
-  return (
-    <div className="flex items-center gap-2.5">
-      <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <circle cx="14" cy="14" r="13" fill="#1d4ed8"/>
-        <circle cx="14" cy="14" r="13" stroke="#3b82f6" strokeWidth="0.5"/>
-        <path d="M2.5 14 Q8 7.5 14 14 Q20 20.5 25.5 14" stroke="white" strokeWidth="1.5" strokeLinecap="round" fill="none"/>
-        <path d="M2.5 14 Q8 20.5 14 14 Q20 7.5 25.5 14" stroke="white" strokeWidth="0.6" strokeLinecap="round" fill="none" opacity="0.35"/>
-      </svg>
-      <div className="leading-none select-none">
-        <div className="text-white font-black text-base tracking-tight leading-none">ATP</div>
-        <div className="text-blue-400 font-semibold leading-none mt-[3px]" style={{ fontSize: '8px', letterSpacing: '4px' }}>TOUR</div>
-      </div>
-    </div>
-  )
-}
-
 export default function Navbar() {
   return (
-    <nav className="bg-[#06090f] border-b border-slate-800/60 sticky top-0 z-50">
-      <div className="max-w-2xl mx-auto px-4 flex items-center justify-between h-14">
-        <NavLink to="/">
-          <ATPLogo />
+    <nav className="bg-[#06090f] sticky top-0 z-50 clay-grain">
+      <div className="max-w-2xl mx-auto px-4 flex items-center justify-between h-20">
+
+        {/* Logo ATP TOUR */}
+        <NavLink to="/" className="flex items-center gap-3 shrink-0">
+          {/* Silhueta do tenista */}
+          <TennisPlayerSVG height={52} className="opacity-90" />
+
+          {/* Texto ATP TOUR */}
+          <div className="leading-none select-none">
+            <div
+              className="text-white font-black leading-none tracking-tighter"
+              style={{ fontSize: '48px', lineHeight: 1 }}
+            >
+              ATP
+            </div>
+            <div
+              className="font-black leading-none tracking-widest uppercase"
+              style={{
+                fontSize: '11px',
+                letterSpacing: '6px',
+                color: '#C2703A',
+                marginTop: '3px',
+              }}
+            >
+              TOUR
+            </div>
+          </div>
         </NavLink>
-        <div className="flex gap-0.5">
+
+        {/* Links de navegação */}
+        <div className="flex gap-0.5 shrink-0">
           {links.map(l => (
             <NavLink
               key={l.to}
@@ -51,8 +61,14 @@ export default function Navbar() {
           ))}
         </div>
       </div>
-      {/* Accent line */}
-      <div className="h-px bg-gradient-to-r from-transparent via-blue-600/40 to-transparent" />
+
+      {/* Linha de saibro na base do navbar — como a linha de fundo de uma quadra */}
+      <div
+        className="h-[2px] clay-grain-strong"
+        style={{
+          background: 'linear-gradient(90deg, transparent 0%, #8B4513 10%, #C2703A 40%, #D4845A 50%, #C2703A 60%, #8B4513 90%, transparent 100%)',
+        }}
+      />
     </nav>
   )
 }

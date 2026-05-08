@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { getMatches, getPlayers } from '../lib/supabase'
 import PlayerCard from '../components/PlayerCard'
+import { CourtBaseline } from '../components/TennisDeco'
 import { calcularRanking } from '../lib/ranking'
 
 export default function Rankings() {
@@ -16,15 +17,12 @@ export default function Rankings() {
 
   return (
     <div className="px-4 py-6">
-      <div className="flex items-end justify-between mb-6">
-        <div>
-          <p className="text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-1">ATP Tour</p>
-          <h1 className="text-2xl font-black text-white">Ranking</h1>
-        </div>
-        {ranking.length > 0 && (
-          <span className="text-xs text-slate-600">{ranking.length} jogadores</span>
-        )}
+      <div className="mb-4">
+        <p className="text-[11px] font-bold uppercase tracking-widest mb-1" style={{ color: '#C2703A' }}>ATP Tour</p>
+        <h1 className="text-2xl font-black text-white">Ranking</h1>
       </div>
+
+      <CourtBaseline className="mb-5" />
 
       {loading && (
         <div className="text-slate-600 text-sm text-center py-12 animate-pulse">Carregando...</div>
@@ -44,9 +42,12 @@ export default function Rankings() {
       </div>
 
       {ranking.length > 0 && (
-        <p className="text-[10px] text-slate-700 text-center pt-4 uppercase tracking-widest">
-          Ordenado por win rate · mínimo 1 partida
-        </p>
+        <>
+          <CourtBaseline className="mt-5 mb-3" />
+          <p className="text-[10px] text-slate-700 text-center uppercase tracking-widest">
+            Ordenado por win rate · mínimo 1 partida
+          </p>
+        </>
       )}
     </div>
   )

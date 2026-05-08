@@ -28,30 +28,37 @@ export default function MatchCard({ match, compact = false, onDeleted }) {
   })
 
   return (
-    <div className="bg-[#0d1117] border border-slate-800/80 rounded-xl overflow-hidden">
-      {/* Set header row */}
+    <div className="clay-border-left clay-grain bg-[#0d1117] border border-slate-800/80 rounded-xl overflow-hidden">
+      {/* Cabeçalho com labels dos sets */}
       <div className="flex items-center justify-between px-4 pt-2.5 pb-1">
         <span className="text-[10px] text-slate-600 uppercase tracking-widest font-semibold">Partida</span>
         <div className="flex gap-4 pr-1">
           {sets.map(s => (
-            <span key={s.set_number} className="text-[10px] text-slate-600 uppercase tracking-widest font-semibold w-5 text-center">
+            <span
+              key={s.set_number}
+              className="text-[10px] uppercase tracking-widest font-semibold w-5 text-center"
+              style={{ color: s.is_super_tiebreak ? '#C2703A' : '#475569' }}
+            >
               {s.is_super_tiebreak ? 'STB' : `S${s.set_number}`}
             </span>
           ))}
         </div>
       </div>
 
-      {/* Divider */}
-      <div className="h-px bg-slate-800/60 mx-4" />
+      {/* Linha divisória — como a linha de serviço */}
+      <div className="h-px mx-4" style={{ background: 'linear-gradient(90deg, rgba(194,112,58,0.3) 0%, rgba(194,112,58,0.1) 100%)' }} />
 
-      {/* Players */}
+      {/* Jogadores e placares */}
       <div className="px-4 py-2 space-y-0.5">
         {players.map((p, idx) => {
           const isWinner = winner?.id === p?.id
           return (
             <div key={p?.id} className="flex items-center justify-between py-1.5">
               <div className="flex items-center gap-2.5 min-w-0 flex-1">
-                <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${isWinner ? 'bg-emerald-400' : 'bg-transparent'}`} />
+                <span
+                  className="w-1.5 h-1.5 rounded-full shrink-0"
+                  style={{ background: isWinner ? '#4ade80' : 'transparent' }}
+                />
                 <span className={`font-semibold truncate text-sm ${isWinner ? 'text-white' : 'text-slate-500'}`}>
                   {p?.name}
                 </span>
@@ -64,11 +71,14 @@ export default function MatchCard({ match, compact = false, onDeleted }) {
                   return (
                     <span
                       key={s.set_number}
-                      className={`tabular font-bold text-base w-5 text-center ${
-                        wonSet
-                          ? isWinner ? 'text-white' : 'text-slate-300'
-                          : 'text-slate-600'
-                      } ${s.is_super_tiebreak && wonSet ? 'text-yellow-400' : ''}`}
+                      className="tabular font-bold text-base w-5 text-center"
+                      style={{
+                        color: s.is_super_tiebreak && wonSet
+                          ? '#C2703A'
+                          : wonSet
+                            ? (isWinner ? '#ffffff' : '#cbd5e1')
+                            : '#475569',
+                      }}
                     >
                       {score}
                     </span>
@@ -80,7 +90,7 @@ export default function MatchCard({ match, compact = false, onDeleted }) {
         })}
       </div>
 
-      {/* Footer */}
+      {/* Rodapé */}
       <div className="flex items-center justify-between px-4 py-2 border-t border-slate-800/60 bg-slate-900/30">
         <div className="flex items-center gap-3">
           <span className="text-xs text-slate-600">{date}</span>

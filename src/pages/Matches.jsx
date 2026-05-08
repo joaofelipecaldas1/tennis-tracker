@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { getMatches } from '../lib/supabase'
 import MatchCard from '../components/MatchCard'
+import { CourtBaseline, RacketIcon } from '../components/TennisDeco'
 
 export default function Matches() {
   const [matches, setMatches] = useState([])
@@ -20,10 +21,13 @@ export default function Matches() {
 
   return (
     <div className="px-4 py-6">
-      <div className="flex items-end justify-between mb-6">
+      <div className="flex items-end justify-between mb-4">
         <div>
-          <p className="text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-1">Histórico</p>
-          <h1 className="text-2xl font-black text-white">Partidas</h1>
+          <p className="text-[11px] font-bold uppercase tracking-widest mb-1" style={{ color: '#C2703A' }}>Histórico</p>
+          <div className="flex items-center gap-2">
+            <h1 className="text-2xl font-black text-white">Partidas</h1>
+            <RacketIcon size={16} className="text-slate-700 mb-0.5" />
+          </div>
         </div>
         <Link
           to="/matches/new"
@@ -32,6 +36,8 @@ export default function Matches() {
           + Nova
         </Link>
       </div>
+
+      <CourtBaseline className="mb-5" />
 
       {loading && (
         <div className="text-slate-600 text-sm text-center py-12 animate-pulse">Carregando...</div>
