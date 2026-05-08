@@ -13,7 +13,10 @@ export default function App() {
     <BrowserRouter>
       <div className="min-h-screen bg-[#080c14] text-white">
         <Navbar />
-        <main className="max-w-2xl mx-auto pb-12">
+        <main
+          className="max-w-2xl mx-auto"
+          style={{ paddingBottom: 'calc(3rem + env(safe-area-inset-bottom, 0px))' }}
+        >
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/matches" element={<Matches />} />
