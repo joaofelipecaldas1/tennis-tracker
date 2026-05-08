@@ -9,9 +9,6 @@ const links = [
   { to: '/players', label: 'Jogadores' },
 ]
 
-const ATP_LOGO =
-  'https://upload.wikimedia.org/wikipedia/commons/thumb/6/6b/ATP_Tour_logo.svg/320px-ATP_Tour_logo.svg.png'
-
 export default function Navbar() {
   const [open, setOpen] = useState(false)
   const close = () => setOpen(false)
@@ -22,14 +19,12 @@ export default function Navbar() {
         {/* Barra principal */}
         <div className="max-w-2xl mx-auto px-4 flex items-center justify-between h-14">
 
-          {/* Logo oficial ATP Tour */}
-          <NavLink to="/" onClick={close} className="shrink-0">
-            <img
-              src={ATP_LOGO}
-              alt="ATP Tour"
-              loading="eager"
-              className="h-7 sm:h-8 w-auto object-contain"
-            />
+          {/* Logo */}
+          <NavLink to="/" onClick={close} className="flex items-center gap-2 shrink-0">
+            <span className="text-2xl leading-none">🎾</span>
+            <span className="text-white font-bold text-xl leading-none tracking-tight">
+              ATP TOUR
+            </span>
           </NavLink>
 
           {/* Nav desktop — oculto no mobile */}
