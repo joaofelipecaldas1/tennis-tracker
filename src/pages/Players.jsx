@@ -33,7 +33,7 @@ export default function Players() {
   }
 
   async function handleDelete(id, name) {
-    if (!confirm(`Excluir ${name}? Todas as partidas do jogador também serão excluídas.`)) return
+    if (!confirm(`Excluir ${name}? Todas as partidas também serão excluídas.`)) return
     try {
       await deletePlayer(id)
       setPlayers(prev => prev.filter(p => p.id !== id))
@@ -43,39 +43,40 @@ export default function Players() {
   }
 
   return (
-    <div className="px-4 py-6 space-y-6 max-w-lg mx-auto">
-      <h1 className="text-xl font-bold text-white">Jogadores</h1>
+    <div className="px-4 py-6 max-w-lg mx-auto">
+      <div className="mb-6">
+        <p className="text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-1">Gestão</p>
+        <h1 className="text-2xl font-black text-white">Jogadores</h1>
+      </div>
 
-      {/* Adicionar jogador */}
-      <form onSubmit={handleAdd} className="flex gap-2">
+      {/* Adicionar */}
+      <form onSubmit={handleAdd} className="flex gap-2 mb-6">
         <input
           type="text"
           value={newName}
           onChange={e => setNewName(e.target.value)}
           placeholder="Nome do jogador"
-          className="flex-1 bg-gray-700 border border-gray-600 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-green-500"
+          className="flex-1 bg-slate-900 border border-slate-700 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/30 transition-colors"
         />
         <button
           type="submit"
           disabled={saving || !newName.trim()}
-          className="bg-green-500 hover:bg-green-400 disabled:opacity-50 text-gray-900 font-bold px-4 py-2 rounded-lg text-sm transition-colors"
+          className="bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white font-bold px-4 py-2 rounded-lg text-sm transition-colors"
         >
           {saving ? '...' : 'Adicionar'}
         </button>
       </form>
 
-      {error && (
-        <p className="text-red-400 text-sm">{error}</p>
-      )}
+      {error && <p className="text-red-400 text-sm mb-4">{error}</p>}
 
       {loading && (
-        <div className="text-gray-400 text-sm text-center py-8 animate-pulse">Carregando...</div>
+        <div className="text-slate-600 text-sm text-center py-8 animate-pulse">Carregando...</div>
       )}
 
       {!loading && players.length === 0 && (
-        <div className="text-center py-8 text-gray-500">
-          <p className="text-3xl mb-2">👤</p>
-          <p>Nenhum jogador cadastrado.</p>
+        <div className="text-center py-8 text-slate-600">
+          <p className="font-semibold text-slate-500 mb-1">Nenhum jogador</p>
+          <p className="text-sm">Adicione os jogadores do grupo para começar.</p>
         </div>
       )}
 
@@ -83,12 +84,12 @@ export default function Players() {
         {players.map(p => (
           <div
             key={p.id}
-            className="bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 flex items-center justify-between"
+            className="bg-[#0d1117] border border-slate-800 rounded-xl px-4 py-3 flex items-center justify-between"
           >
-            <span className="text-white font-medium">{p.name}</span>
+            <span className="text-white font-semibold text-sm">{p.name}</span>
             <button
               onClick={() => handleDelete(p.id, p.name)}
-              className="text-red-400 hover:text-red-300 text-sm transition-colors"
+              className="text-xs text-slate-600 hover:text-red-400 transition-colors font-medium"
             >
               Remover
             </button>
