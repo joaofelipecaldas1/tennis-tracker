@@ -6,7 +6,7 @@ export default function MatchCard({ match, compact = false, onDeleted }) {
   const [deleting, setDeleting] = useState(false)
   const navigate = useNavigate()
 
-  const { player1, player2, winner, sets, played_at, notes } = match
+  const { player1, player2, winner, sets, played_at, notes, is_walkover } = match
   const players = [player1, player2]
 
   async function handleDelete() {
@@ -110,6 +110,11 @@ export default function MatchCard({ match, compact = false, onDeleted }) {
       <div className="flex items-center justify-between px-4 py-2 border-t border-slate-800/60 bg-slate-900/30">
         <div className="flex items-center gap-2 min-w-0">
           <span className="text-xs text-slate-600 shrink-0">{date}</span>
+          {is_walkover && (
+            <span className="shrink-0 px-1.5 py-0.5 rounded text-[10px] font-black tracking-wider bg-orange-950/60 border border-orange-800/50 text-orange-400">
+              W/O
+            </span>
+          )}
           {notes && (
             <span className="text-xs text-slate-600 italic truncate max-w-24">"{notes}"</span>
           )}

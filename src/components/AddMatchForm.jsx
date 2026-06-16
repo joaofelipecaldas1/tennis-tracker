@@ -48,6 +48,8 @@ export default function AddMatchForm({ existingMatch }) {
   const [sets, setSets] = useState([{ ...emptySet }, { ...emptySet }])
   const [hasThirdSet, setHasThirdSet] = useState(false)
   const [thirdSetType, setThirdSetType] = useState('normal')
+  const [isWalkover, setIsWalkover] = useState(false)
+  const [walkoverWinnerId, setWalkoverWinnerId] = useState('')
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
 
@@ -61,6 +63,8 @@ export default function AddMatchForm({ existingMatch }) {
     setPlayer2Id(existingMatch.player2_id)
     setPlayedAt(existingMatch.played_at)
     setNotes(existingMatch.notes || '')
+    setIsWalkover(existingMatch.is_walkover || false)
+    setWalkoverWinnerId(existingMatch.winner_id || '')
     const s = existingMatch.sets || []
     const base = s.slice(0, 2).map(x => ({
       score_p1: String(x.score_p1),
@@ -113,20 +117,41 @@ export default function AddMatchForm({ existingMatch }) {
       setError('Selecione dois jogadores diferentes')
       return
     }
-    for (let i = 0; i < sets.length; i++) {
-      const err = validarSet(sets[i], i, i === 2 && thirdSetType === 'supertiebreak')
-      if (err) { setError(err); return }
+
+    let winnerId
+    let activeSets
+
+    if (isWalkover) {
+      if (!walkoverWinnerId) {
+        setError('Selecione o vencedor do walkover')
+        return
+      }
+      winnerId = walkoverWinnerId
+      // Só salva sets que tenham ambos os placares preenchidos
+      activeSets = sets
+        .filter(s => s.score_p1 !== '' && s.score_p2 !== '')
+        .map((s, i) => ({
+          score_p1: parseInt(s.score_p1),
+          score_p2: parseInt(s.score_p2),
+          is_super_tiebreak: false,
+        }))
+    } else {
+      for (let i = 0; i < sets.length; i++) {
+        const err = validarSet(sets[i], i, i === 2 && thirdSetType === 'supertiebreak')
+        if (err) { setError(err); return }
+      }
+      activeSets = sets.map((s, i) => ({
+        score_p1: parseInt(s.score_p1),
+        score_p2: parseInt(s.score_p2),
+        is_super_tiebreak: i === 2 && thirdSetType === 'supertiebreak',
+      }))
+      winnerId = calcularVencedor(activeSets, player1Id, player2Id)
+      if (!winnerId) {
+        setError('Não foi possível determinar o vencedor. Verifique o placar.')
+        return
+      }
     }
-    const activeSets = sets.map((s, i) => ({
-      score_p1: parseInt(s.score_p1),
-      score_p2: parseInt(s.score_p2),
-      is_super_tiebreak: i === 2 && thirdSetType === 'supertiebreak',
-    }))
-    const winnerId = calcularVencedor(activeSets, player1Id, player2Id)
-    if (!winnerId) {
-      setError('Não foi possível determinar o vencedor. Verifique o placar.')
-      return
-    }
+
     setSaving(true)
     try {
       const payload = {
@@ -135,6 +160,7 @@ export default function AddMatchForm({ existingMatch }) {
         winner_id: winnerId,
         played_at: playedAt,
         notes: notes || null,
+        is_walkover: isWalkover,
         sets: activeSets,
       }
       if (existingMatch) await updateMatch(existingMatch.id, payload)
@@ -147,7 +173,7 @@ export default function AddMatchForm({ existingMatch }) {
   }
 
   const previewWinner =
-    player1Id && player2Id
+    !isWalkover && player1Id && player2Id
       ? calcularVencedor(
           sets.map((s, i) => ({
             score_p1: parseInt(s.score_p1) || 0,
@@ -161,6 +187,11 @@ export default function AddMatchForm({ existingMatch }) {
   const previewWinnerName = previewWinner
     ? players.find(p => p.id === previewWinner)?.name
     : null
+
+  const walkoverPlayers = [
+    players.find(p => p.id === player1Id),
+    players.find(p => p.id === player2Id),
+  ].filter(Boolean)
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
@@ -192,9 +223,64 @@ export default function AddMatchForm({ existingMatch }) {
         </div>
       </div>
 
+      {/* Toggle Walkover */}
+      <div>
+        <label className="flex items-center gap-3 cursor-pointer select-none">
+          <div
+            onClick={() => setIsWalkover(v => !v)}
+            className={`relative w-11 h-6 rounded-full transition-colors duration-200 shrink-0 ${
+              isWalkover ? 'bg-orange-500' : 'bg-slate-700'
+            }`}
+          >
+            <span
+              className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform duration-200 ${
+                isWalkover ? 'translate-x-5' : 'translate-x-0'
+              }`}
+            />
+          </div>
+          <div>
+            <span className={`text-base font-semibold ${isWalkover ? 'text-orange-400' : 'text-slate-400'}`}>
+              Walkover
+            </span>
+            {isWalkover && (
+              <p className="text-xs text-slate-500 mt-0.5">
+                Placar parcial opcional — selecione o vencedor manualmente
+              </p>
+            )}
+          </div>
+        </label>
+
+        {/* Seleção manual de vencedor */}
+        {isWalkover && (
+          <div className="mt-3">
+            <label className={labelCls}>Vencedor</label>
+            <select
+              required
+              value={walkoverWinnerId}
+              onChange={e => setWalkoverWinnerId(e.target.value)}
+              className={`${inputCls} border-orange-800/60 focus:border-orange-500 focus:ring-orange-500/20`}
+            >
+              <option value="">Selecione o vencedor...</option>
+              {walkoverPlayers.map(p => (
+                <option key={p.id} value={p.id}>
+                  {p.name}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
+      </div>
+
       {/* Sets */}
       <div>
-        <p className={labelCls}>Placar dos sets</p>
+        <p className={labelCls}>
+          Placar dos sets
+          {isWalkover && (
+            <span className="ml-2 normal-case text-slate-600 font-normal tracking-normal">
+              (opcional)
+            </span>
+          )}
+        </p>
         <div className="space-y-2">
           {sets.map((s, i) => (
             <div
@@ -207,14 +293,13 @@ export default function AddMatchForm({ existingMatch }) {
                   : `${i + 1}º Set`}
               </p>
               <div className="flex items-center gap-3">
-                {/* Score inputs: type="number" abre teclado numérico no mobile */}
                 <input
                   type="number"
                   inputMode="numeric"
                   min="0"
                   max="99"
-                  required
-                  placeholder="0"
+                  required={!isWalkover}
+                  placeholder="–"
                   value={s.score_p1}
                   onChange={e => updateSet(i, 'score_p1', e.target.value)}
                   className="w-full bg-slate-800 border border-slate-700 rounded-xl px-2 py-4 text-white text-center text-3xl font-black tabular focus:outline-none focus:border-blue-500"
@@ -225,8 +310,8 @@ export default function AddMatchForm({ existingMatch }) {
                   inputMode="numeric"
                   min="0"
                   max="99"
-                  required
-                  placeholder="0"
+                  required={!isWalkover}
+                  placeholder="–"
                   value={s.score_p2}
                   onChange={e => updateSet(i, 'score_p2', e.target.value)}
                   className="w-full bg-slate-800 border border-slate-700 rounded-xl px-2 py-4 text-white text-center text-3xl font-black tabular focus:outline-none focus:border-blue-500"
@@ -248,7 +333,7 @@ export default function AddMatchForm({ existingMatch }) {
           />
           <span className="text-base text-slate-400">Adicionar 3º set</span>
         </label>
-        {hasThirdSet && (
+        {hasThirdSet && !isWalkover && (
           <div className="flex gap-5 ml-8">
             {[
               ['normal', 'Set normal'],
@@ -270,12 +355,22 @@ export default function AddMatchForm({ existingMatch }) {
         )}
       </div>
 
-      {/* Preview vencedor */}
+      {/* Preview vencedor (só em partidas normais) */}
       {previewWinnerName && (
         <div className="flex items-center gap-2.5 bg-emerald-900/20 border border-emerald-800/40 rounded-xl px-4 py-3">
           <span className="w-2 h-2 rounded-full bg-emerald-400 shrink-0" />
           <span className="text-sm text-emerald-400">
             Vencedor: <strong>{previewWinnerName}</strong>
+          </span>
+        </div>
+      )}
+
+      {/* Preview walkover */}
+      {isWalkover && walkoverWinnerId && (
+        <div className="flex items-center gap-2.5 bg-orange-900/20 border border-orange-800/40 rounded-xl px-4 py-3">
+          <span className="text-orange-400 font-black text-xs tracking-widest">W/O</span>
+          <span className="text-sm text-orange-300">
+            Vencedor: <strong>{players.find(p => p.id === walkoverWinnerId)?.name}</strong>
           </span>
         </div>
       )}

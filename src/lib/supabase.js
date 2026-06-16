@@ -52,48 +52,50 @@ export async function getMatches() {
   }))
 }
 
-export async function createMatch({ player1_id, player2_id, winner_id, played_at, notes, sets }) {
+export async function createMatch({ player1_id, player2_id, winner_id, played_at, notes, is_walkover, sets }) {
   const { data: match, error: matchError } = await supabase
     .from('matches')
-    .insert({ player1_id, player2_id, winner_id, played_at, notes })
+    .insert({ player1_id, player2_id, winner_id, played_at, notes, is_walkover: is_walkover || false })
     .select()
     .single()
   if (matchError) throw matchError
 
-  const setsToInsert = sets.map((s, i) => ({
-    match_id: match.id,
-    set_number: i + 1,
-    score_p1: s.score_p1,
-    score_p2: s.score_p2,
-    is_super_tiebreak: s.is_super_tiebreak || false,
-  }))
-
-  const { error: setsError } = await supabase.from('sets').insert(setsToInsert)
-  if (setsError) throw setsError
+  if (sets.length > 0) {
+    const setsToInsert = sets.map((s, i) => ({
+      match_id: match.id,
+      set_number: i + 1,
+      score_p1: s.score_p1,
+      score_p2: s.score_p2,
+      is_super_tiebreak: s.is_super_tiebreak || false,
+    }))
+    const { error: setsError } = await supabase.from('sets').insert(setsToInsert)
+    if (setsError) throw setsError
+  }
 
   return match
 }
 
-export async function updateMatch(id, { player1_id, player2_id, winner_id, played_at, notes, sets }) {
+export async function updateMatch(id, { player1_id, player2_id, winner_id, played_at, notes, is_walkover, sets }) {
   const { error: matchError } = await supabase
     .from('matches')
-    .update({ player1_id, player2_id, winner_id, played_at, notes })
+    .update({ player1_id, player2_id, winner_id, played_at, notes, is_walkover: is_walkover || false })
     .eq('id', id)
   if (matchError) throw matchError
 
   const { error: deleteError } = await supabase.from('sets').delete().eq('match_id', id)
   if (deleteError) throw deleteError
 
-  const setsToInsert = sets.map((s, i) => ({
-    match_id: id,
-    set_number: i + 1,
-    score_p1: s.score_p1,
-    score_p2: s.score_p2,
-    is_super_tiebreak: s.is_super_tiebreak || false,
-  }))
-
-  const { error: setsError } = await supabase.from('sets').insert(setsToInsert)
-  if (setsError) throw setsError
+  if (sets.length > 0) {
+    const setsToInsert = sets.map((s, i) => ({
+      match_id: id,
+      set_number: i + 1,
+      score_p1: s.score_p1,
+      score_p2: s.score_p2,
+      is_super_tiebreak: s.is_super_tiebreak || false,
+    }))
+    const { error: setsError } = await supabase.from('sets').insert(setsToInsert)
+    if (setsError) throw setsError
+  }
 }
 
 export async function deleteMatch(id) {
